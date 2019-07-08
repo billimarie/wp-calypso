@@ -29,7 +29,7 @@ import FormPasswordInput from 'components/forms/form-password-input';
 import FormTextInput from 'components/forms/form-text-input';
 import getCurrentQueryArguments from 'state/selectors/get-current-query-arguments';
 import getInitialQueryArguments from 'state/selectors/get-initial-query-arguments';
-import { getCurrentUserId } from 'state/current-user/selectors';
+import { getCurrentUserId, getCurrentUserName } from 'state/current-user/selectors';
 import { getCurrentOAuth2Client } from 'state/ui/oauth2-clients/selectors';
 import {
 	formUpdate,
@@ -289,6 +289,8 @@ export class LoginForm extends Component {
 
 		return (
 			<form method="post">
+				{ this.renderAlreadyLoggedInPrompt() }
+
 				<Card className="login__form">
 					{ this.renderPrivateSiteNotice() }
 					<div className="login__form-userdata">
@@ -428,6 +430,31 @@ export class LoginForm extends Component {
 		);
 	}
 
+	renderAlreadyLoggedInPrompt() {
+		const { isLoggedIn, currentUserName } = this.props;
+
+		return (
+			isLoggedIn && (
+				<Notice status="is-info" showDismiss={ false } icon="lock">
+					{ this.props.translate(
+						'You are already logged in as {{em}}%(email)s{{/em}}. ' +
+							'{{a}}Click here{{/a}} to continue as that user, or log in as ' +
+							'a different user below.',
+						{
+							args: {
+								email: currentUserName,
+							},
+							components: {
+								a: <a href="/" />,
+								em: <em />,
+							},
+						}
+					) }
+				</Notice>
+			)
+		);
+	}
+
 	render() {
 		const isFormDisabled = this.state.isFormDisabledWhileLoading || this.props.isFormDisabled;
 
@@ -464,9 +491,8 @@ export class LoginForm extends Component {
 						{ this.props.translate( 'Connect with your WordPress.com account:' ) }
 					</p>
 				) }
-
 				{ this.renderPrivateSiteNotice() }
-
+				{ this.renderAlreadyLoggedInPrompt() }
 				<Card className="login__form">
 					<div className="login__form-userdata">
 						{ linkingSocialUser && (
@@ -613,7 +639,6 @@ export class LoginForm extends Component {
 						</div>
 					) }
 				</Card>
-
 				{ config.isEnabled( 'signup/social' ) && (
 					<Fragment>
 						<Divider>{ this.props.translate( 'or' ) }</Divider>
@@ -642,6 +667,7 @@ export default connect(
 			hasAccountTypeLoaded: accountType !== null,
 			isFormDisabled: isFormDisabledSelector( state ),
 			isLoggedIn: Boolean( getCurrentUserId( state ) ),
+			currentUserName: getCurrentUserName( state ),
 			oauth2Client: getCurrentOAuth2Client( state ),
 			isJetpackWooCommerceFlow:
 				'woocommerce-setup-wizard' === get( getCurrentQueryArguments( state ), 'from' ),
