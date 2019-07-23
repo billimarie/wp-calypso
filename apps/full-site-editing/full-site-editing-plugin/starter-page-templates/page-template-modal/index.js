@@ -18,6 +18,7 @@ import replacePlaceholders from './utils/replace-placeholders';
 import './styles/starter-page-templates-editor.scss';
 import TemplateSelectorControl from './components/template-selector-control';
 import { trackDismiss, trackSelection, trackView, initializeWithIdentity } from './utils/tracking';
+import ensureAssets from './utils/ensure-assets';
 
 class PageTemplateModal extends Component {
 	state = {
@@ -126,12 +127,16 @@ const PageTemplatesPlugin = compose(
 				// Insert blocks.
 				const postContentBlock = ownProps.postContentBlock;
 				const blocks = parseBlocks( template.content );
-				editorDispatcher.insertBlocks(
-					blocks,
-					0,
-					postContentBlock ? postContentBlock.clientId : '',
-					false
-				);
+				ensureAssets( blocks )
+					.then( blocksWithAssets => {
+						editorDispatcher.insertBlocks(
+							blocksWithAssets,
+							0,
+							postContentBlock ? postContentBlock.clientId : '',
+							false
+						);
+					} )
+					.catch( e => console.log( e ) );
 			},
 		};
 	} )
