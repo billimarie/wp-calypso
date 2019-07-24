@@ -3,6 +3,24 @@
  */
 import { reduce, isEmpty, forEach, set } from 'lodash';
 
+const addAssetToLoad = ( assets, url, usages ) => {
+	// Use an existing asset for the URL or make a new one.
+	const asset = assets[ url ] || {
+		url,
+		usages: [],
+	};
+
+	// Return new result object, extended with the new/updated asset.
+	return {
+		...assets,
+		[ url ]: {
+			...asset,
+			// Store where exactly block uses id/url so we can update it later.
+			usages: [ ...asset.usages, ...usages ],
+		},
+	};
+};
+
 const findAssets = ( result, block ) => {
 	result.blocksByClientId[ block.clientId ] = block;
 
@@ -14,23 +32,16 @@ const findAssets = ( result, block ) => {
 		case 'core/image': {
 			const url = block.attributes.url;
 			if ( url ) {
-				// Add assets to the fetch list if it's not there yet.
-				if ( ! result.assets[ url ] ) {
-					result.assets[ url ] = {
-						url,
-						usages: [],
-					};
-				}
-
-				// Store where exactly block uses id/url so we can update it later.
-				result.assets[ url ].usages.push( {
-					prop: 'url',
-					path: [ block.clientId, 'attributes', 'url' ],
-				} );
-				result.assets[ url ].usages.push( {
-					prop: 'id',
-					path: [ block.clientId, 'attributes', 'id' ],
-				} );
+				result.assets = addAssetToLoad( result.assets, url, [
+					{
+						prop: 'url',
+						path: [ block.clientId, 'attributes', 'url' ],
+					},
+					{
+						prop: 'id',
+						path: [ block.clientId, 'attributes', 'id' ],
+					},
+				] );
 			}
 		}
 	}
@@ -75,7 +86,7 @@ const getBlocksWithAppliedAssets = detectedAssets => {
 		const newAsset = detectedAssets.fetched[ asset.url ];
 		console.log( 'was fetched as', newAsset );
 		if ( ! newAsset ) {
-			console.log('asset not present, skipping usages');
+			console.log( 'asset not present, skipping usages' );
 			return;
 		}
 		forEach( asset.usages, usage => {
