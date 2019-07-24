@@ -8,7 +8,7 @@ const findAssets = ( result, block ) => {
 
 	// Identify assets in blocks where we expect them.
 	switch ( block.name ) {
-		case 'core/image':
+		case 'core/image': {
 			const url = block.attributes.url;
 			if ( url ) {
 				// Add assets to the fetch list if it's not there yet.
@@ -29,6 +29,7 @@ const findAssets = ( result, block ) => {
 					path: [ block.clientId, 'attributes', 'id' ],
 				} );
 			}
+		}
 	}
 
 	// Recursively process all inner blocks.
