@@ -3,6 +3,55 @@
  */
 import { reduce, isEmpty, forEach, set } from 'lodash';
 
+/**
+ * A full asset URL.
+ * @typedef {String} URL
+ */
+
+/**
+ * Gutenberg Block.
+ * @typedef {Object} GutenbergBlock
+ * @property {String} clientId A unique id of the block.
+ * @property {String} name A block name, like "core/paragraph".
+ * @property {Array<GutenbergBlock>} innerBlocks Nested blocks.
+ * @property {Object} attributes An object with attributes, different for each block type.
+ */
+
+/**
+ * Usage object contains an info that certain property is used inside another object.
+ * @typedef {Object} Usage
+ * @property {String} prop Name of the property.
+ * @property {Array<String|Number>} path A path inside an object where prop is, defined as list of keys.
+ */
+
+/**
+ * An asset file that is referenced in blocks.
+ * @typedef {Object} Asset
+ * @property {URL} url A full URL of the asset.
+ * @property {Array<Usage>} usages A list of {@link Usage} objects.
+ */
+
+/**
+ * A collection of {@link Asset} objects, keyed by their URLs.
+ * @typedef {Object.<String, Asset>} Assets URLs as keys, {@link Asset}.as a values.
+ */
+
+/**
+ * FetchSession describes a set of blocks and their assets.
+ * @typedef {Object} FetchSession
+ * @property {Array<GutenbergBlock>} blocks List of Gutenberg blocks.
+ * @property {Object<String, GutenbergBlock>} blocksByClientId Blocks, keyed by their `clientId`
+ * @property {Assets} assets A list of assets detected in blocks.
+ */
+
+/**
+ * Extends an {@link Assets} object with a new asset and updates its usages.
+ *
+ * @param {Assets} assets Object containing assets.
+ * @param {URL} url A full URL of the asset.
+ * @param {Array<Usage>} usages A list of {@link Usage} objects.
+ * @returns {Assets} assets object with the new {@link Asset} included
+ */
 const addAssetToLoad = ( assets, url, usages ) => {
 	// Use an existing asset for the URL or make a new one.
 	const asset = assets[ url ] || {
@@ -21,8 +70,18 @@ const addAssetToLoad = ( assets, url, usages ) => {
 	};
 };
 
-const findAssets = ( result, block ) => {
-	result.blocksByClientId[ block.clientId ] = block;
+/**
+ * This function is used as a reducer iteratee. It checks if the block
+ * contains any image and if so, enqueues it to be downloaded later.
+ *
+ * @param {FetchSession} session Session object.
+ * @param {GutenbergBlock} block Gutenberg Block object.
+ * @returns {FetchSession} Updated session object
+ */
+const findAssetsInBlock = ( session, block ) => {
+	// Save a reference for the block so we can later easily
+	// find it without any loops and recursion.
+	session.blocksByClientId[ block.clientId ] = block;
 
 	// Identify assets in blocks where we expect them.
 	switch ( block.name ) {
@@ -32,7 +91,7 @@ const findAssets = ( result, block ) => {
 		case 'core/image': {
 			const url = block.attributes.url;
 			if ( url ) {
-				result.assets = addAssetToLoad( result.assets, url, [
+				session.assets = addAssetToLoad( session.assets, url, [
 					{ prop: 'url', path: [ block.clientId, 'attributes', 'url' ] },
 					{ prop: 'id', path: [ block.clientId, 'attributes', 'id' ] },
 				] );
@@ -41,7 +100,7 @@ const findAssets = ( result, block ) => {
 		case 'core/media-text': {
 			const url = block.attributes.mediaUrl;
 			if ( url && block.attributes.mediaType === 'image' ) {
-				result.assets = addAssetToLoad( result.assets, url, [
+				session.assets = addAssetToLoad( session.assets, url, [
 					{ prop: 'url', path: [ block.clientId, 'attributes', 'mediaUrl' ] },
 					{ prop: 'id', path: [ block.clientId, 'attributes', 'mediaId' ] },
 				] );
@@ -49,7 +108,7 @@ const findAssets = ( result, block ) => {
 		}
 		case 'core/gallery': {
 			forEach( block.attributes.images, ( image, i ) => {
-				result.assets = addAssetToLoad( result.assets, image.url, [
+				session.assets = addAssetToLoad( session.assets, image.url, [
 					{ prop: 'url', path: [ block.clientId, 'attributes', 'images', i, 'url' ] },
 					{ prop: 'url', path: [ block.clientId, 'attributes', 'images', i, 'link' ] },
 					{ prop: 'id', path: [ block.clientId, 'attributes', 'images', i, 'id' ] },
@@ -61,67 +120,90 @@ const findAssets = ( result, block ) => {
 
 	// Recursively process all inner blocks.
 	if ( ! isEmpty( block.innerBlocks ) ) {
-		return reduce( block.innerBlocks, findAssets, result );
+		return reduce( block.innerBlocks, findAssetsInBlock, session );
 	}
 
-	return result;
+	return session;
 };
 
-const fetchAssets = async detectedAssets => {
+/**
+ * Calls an API that fetches assets and saves the result into the DetectedAssets object.
+ *
+ * @param {Assets} assets Assets that were detected from blocks.
+ * @returns {Promise} Promise that resoves into an object with URLs as keys and fetch results as values.
+ */
+const fetchAssets = async assets => {
 	return new Promise( resolve => {
 		// Simulate API call delay.
 		setTimeout( () => {
 			// TODO: Get this from API response.
 			const mockImage = {
 				id: 66,
-				url: 'http://test.local/wp-content/uploads/2019/07/Screenshot-2019-07-16-at-17.30.52-1021x1024.png',
+				url:
+					'http://test.local/wp-content/uploads/2019/07/Screenshot-2019-07-16-at-17.30.52-1021x1024.png',
 			};
 
-			detectedAssets.fetched = reduce( detectedAssets.assets, ( fetched, asset ) => ( {
-				...fetched,
-				[ asset.url ]: mockImage,
-			} ), {} );
-
-			resolve( detectedAssets );
+			resolve(
+				reduce(
+					assets,
+					( fetched, asset ) => ( {
+						...fetched,
+						[ asset.url ]: mockImage,
+					} ),
+					{}
+				)
+			);
 		}, 1000 );
 	} );
 };
 
-const getBlocksWithAppliedAssets = detectedAssets => {
-	forEach( detectedAssets.assets, asset => {
-		console.log( 'processing asset', asset );
-		const newAsset = detectedAssets.fetched[ asset.url ];
-		console.log( 'was fetched as', newAsset );
+/**
+ * Takes fetched assets and makes sure all their usages will be changed into
+ * their new local copies.
+ *
+ * @param {FetchSession} session A current session.
+ * @param {Object<String,Object>} fetchedAssets Fetched assets.
+ * @returns {Array<GutenbergBlock>} A promise resolving into an array of blocks.
+ */
+const getBlocksWithAppliedAssets = ( session, fetchedAssets ) => {
+	forEach( session.assets, asset => {
+		const newAsset = fetchedAssets[ asset.url ];
 		if ( ! newAsset ) {
-			console.log( 'asset not present, skipping usages' );
 			return;
 		}
 		forEach( asset.usages, usage => {
-			console.log( usage.prop, 'used in', usage.path );
-			set( detectedAssets.blocksByClientId, usage.path, newAsset[ usage.prop ] );
+			set( session.blocksByClientId, usage.path, newAsset[ usage.prop ] );
 		} );
 	} );
 
-	return detectedAssets.blocks;
+	return session.blocks;
 };
 
-const ensureAssets = async blocks => {
-	const detectedAssets = reduce( blocks, findAssets, {
+/**
+ * Analyzes blocks and if they use any external assets, ensures they are
+ * copied into a local site and are used in blocks instead of the remote ones.
+ *
+ * @param {Array<GutenbergBlock>} blocks Blocks, as returned by `wp.block.parse`
+ * @returns {Promise} A promise that resolves into an array of {@link GutenbergBlock} with updated assets
+ */
+const ensureAssetsInBlocks = async blocks => {
+	// Create a FetchSession object by reducing blocks.
+	const session = reduce( blocks, findAssetsInBlock, {
 		assets: {},
 		blocksByClientId: {},
 		blocks,
 	} );
 
-	console.log( detectedAssets );
-
 	// No assets found. Proceed with insertion right away.
-	if ( isEmpty( detectedAssets.assets ) ) {
+	if ( isEmpty( session.assets ) ) {
 		return blocks;
 	}
 
 	// Ensure assets are available on the site and replace originals
 	// with local copies before inserting the template.
-	return fetchAssets( detectedAssets ).then( getBlocksWithAppliedAssets );
+	return fetchAssets( session.assets ).then( fetchedAssets => {
+		return getBlocksWithAppliedAssets( session, fetchedAssets );
+	} );
 };
 
-export default ensureAssets;
+export default ensureAssetsInBlocks;
