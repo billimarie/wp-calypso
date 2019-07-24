@@ -47,6 +47,16 @@ const findAssets = ( result, block ) => {
 				] );
 			}
 		}
+		case 'core/gallery': {
+			block.attributes.images.forEach( ( image, i ) => {
+				result.assets = addAssetToLoad( result.assets, image.url, [
+					{ prop: 'url', path: [ block.clientId, 'attributes', 'images', i, 'url' ] },
+					{ prop: 'url', path: [ block.clientId, 'attributes', 'images', i, 'link' ] },
+					{ prop: 'id', path: [ block.clientId, 'attributes', 'images', i, 'id' ] },
+					{ prop: 'id', path: [ block.clientId, 'attributes', 'ids', i ] },
+				] );
+			} );
+		}
 	}
 
 	// Recursively process all inner blocks.
