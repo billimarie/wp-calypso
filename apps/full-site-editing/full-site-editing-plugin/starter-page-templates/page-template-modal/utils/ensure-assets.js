@@ -72,22 +72,16 @@ const fetchAssets = async detectedAssets => {
 		// Simulate API call delay.
 		setTimeout( () => {
 			// TODO: Get this from API response.
-			detectedAssets.fetched = {
-				'https://a8ctm1.files.wordpress.com/2019/06/a4650-9f31c-743c3-20ca2-fair-1.jpg?w=640': {
-					id: 123,
-					url:
-						'https://a8ctm1.files.wordpress.com/2019/06/a4650-9f31c-743c3-20ca2-fair-1.jpg?w=640',
-				},
-				'https://a8ctm1.files.wordpress.com/2019/06/ec3b1-91d42-39015-a1d6d-horses.jpg?w=640': {
-					id: 456,
-					url:
-						'https://a8ctm1.files.wordpress.com/2019/06/ec3b1-91d42-39015-a1d6d-horses.jpg?w=640',
-				},
-				'https://a8ctm1.files.wordpress.com/2019/06/39f29-4071c-052ef-71bb0-car.jpg?w=640': {
-					id: 789,
-					url: 'https://a8ctm1.files.wordpress.com/2019/06/39f29-4071c-052ef-71bb0-car.jpg?w=640',
-				},
+			const mockImage = {
+				id: 66,
+				url: 'http://test.local/wp-content/uploads/2019/07/Screenshot-2019-07-16-at-17.30.52-1021x1024.png',
 			};
+
+			detectedAssets.fetched = reduce( detectedAssets.assets, ( fetched, asset ) => ( {
+				...fetched,
+				[ asset.url ]: mockImage,
+			} ), {} );
+
 			resolve( detectedAssets );
 		}, 1000 );
 	} );
