@@ -14,6 +14,8 @@ class WP_REST_Sideload_Image_Controller extends WP_REST_Attachments_Controller {
 	 * WP_REST_Sideload_Image_Controller constructor.
 	 */
 	public function __construct() {
+		parent::__construct( 'attachment' );
+
 		$this->namespace = 'fse/v1';
 		$this->rest_base = 'sideload/image';
 	}
