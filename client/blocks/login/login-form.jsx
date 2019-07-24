@@ -432,8 +432,10 @@ export class LoginForm extends Component {
 
 	renderAlreadyLoggedInPrompt() {
 		const { isLoggedIn, currentUserName } = this.props;
+		const { isFormDisabledWhileLoading } = this.state;
 
 		return (
+			! isFormDisabledWhileLoading &&
 			isLoggedIn && (
 				<Notice status="is-info" showDismiss={ false } icon="lock">
 					{ this.props.translate(
