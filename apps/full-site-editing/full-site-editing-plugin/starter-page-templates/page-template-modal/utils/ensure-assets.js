@@ -8,6 +8,9 @@ const findAssets = ( result, block ) => {
 
 	// Identify assets in blocks where we expect them.
 	switch ( block.name ) {
+		// Both of these blocks use same attribute names for image id and url
+		// and thus we can share the implementation.
+		case 'core/cover':
 		case 'core/image': {
 			const url = block.attributes.url;
 			if ( url ) {
