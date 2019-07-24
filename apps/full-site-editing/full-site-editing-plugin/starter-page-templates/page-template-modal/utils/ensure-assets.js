@@ -71,6 +71,10 @@ const getBlocksWithAppliedAssets = detectedAssets => {
 		console.log( 'processing asset', asset );
 		const newAsset = detectedAssets.fetched[ asset.url ];
 		console.log( 'was fetched as', newAsset );
+		if ( ! newAsset ) {
+			console.log('asset not present, skipping usages');
+			return;
+		}
 		forEach( asset.usages, usage => {
 			console.log( usage.prop, 'used in', usage.path );
 			set( detectedAssets.blocksByClientId, usage.path, newAsset[ usage.prop ] );
