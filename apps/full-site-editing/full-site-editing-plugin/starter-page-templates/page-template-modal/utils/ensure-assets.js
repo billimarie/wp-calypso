@@ -33,14 +33,8 @@ const findAssets = ( result, block ) => {
 			const url = block.attributes.url;
 			if ( url ) {
 				result.assets = addAssetToLoad( result.assets, url, [
-					{
-						prop: 'url',
-						path: [ block.clientId, 'attributes', 'url' ],
-					},
-					{
-						prop: 'id',
-						path: [ block.clientId, 'attributes', 'id' ],
-					},
+					{ prop: 'url', path: [ block.clientId, 'attributes', 'url' ] },
+					{ prop: 'id', path: [ block.clientId, 'attributes', 'id' ] },
 				] );
 			}
 		}
@@ -48,14 +42,8 @@ const findAssets = ( result, block ) => {
 			const url = block.attributes.mediaUrl;
 			if ( url && block.attributes.mediaType === 'image' ) {
 				result.assets = addAssetToLoad( result.assets, url, [
-					{
-						prop: 'url',
-						path: [ block.clientId, 'attributes', 'mediaUrl' ],
-					},
-					{
-						prop: 'id',
-						path: [ block.clientId, 'attributes', 'mediaId' ],
-					},
+					{ prop: 'url', path: [ block.clientId, 'attributes', 'mediaUrl' ] },
+					{ prop: 'id', path: [ block.clientId, 'attributes', 'mediaId' ] },
 				] );
 			}
 		}
