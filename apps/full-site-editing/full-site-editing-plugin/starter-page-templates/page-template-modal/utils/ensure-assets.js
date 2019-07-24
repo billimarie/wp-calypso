@@ -44,6 +44,21 @@ const findAssets = ( result, block ) => {
 				] );
 			}
 		}
+		case 'core/media-text': {
+			const url = block.attributes.mediaUrl;
+			if ( url && block.attributes.mediaType === 'image' ) {
+				result.assets = addAssetToLoad( result.assets, url, [
+					{
+						prop: 'url',
+						path: [ block.clientId, 'attributes', 'mediaUrl' ],
+					},
+					{
+						prop: 'id',
+						path: [ block.clientId, 'attributes', 'mediaId' ],
+					},
+				] );
+			}
+		}
 	}
 
 	// Recursively process all inner blocks.
