@@ -4,6 +4,12 @@
 import { reduce, isEmpty, forEach, set } from 'lodash';
 
 /**
+ * WordPress dependencies
+ */
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
+
+/**
  * A full asset URL.
  * @typedef {String} URL
  */
@@ -133,28 +139,33 @@ const findAssetsInBlock = ( session, block ) => {
  * @returns {Promise} Promise that resoves into an object with URLs as keys and fetch results as values.
  */
 const fetchAssets = async assets => {
-	return new Promise( resolve => {
-		// Simulate API call delay.
-		setTimeout( () => {
-			// TODO: Get this from API response.
-			const mockImage = {
-				id: 66,
-				url:
-					'http://test.local/wp-content/uploads/2019/07/Screenshot-2019-07-16-at-17.30.52-1021x1024.png',
-			};
+	const requests = [];
 
-			resolve(
-				reduce(
-					assets,
-					( fetched, asset ) => ( {
-						...fetched,
-						[ asset.url ]: mockImage,
-					} ),
-					{}
-				)
-			);
-		}, 1000 );
+	forEach( assets, ( { url } ) => {
+		requests.push( {
+			method: 'POST',
+			route: '/fse/v1/sideload/image',
+			params: { url },
+		} );
 	} );
+
+	return await apiFetch( {
+		method: 'POST',
+		path: addQueryArgs( '/fse/v1/batch', { requests } ),
+	} ).then( response =>
+		reduce(
+			assets,
+			( fetched, asset ) => {
+				const { id, source_url } = response[ 'POST /fse/v1/sideload/image' ].shift();
+
+				return {
+					...fetched,
+					[ asset.url ]: { id, url: source_url },
+				};
+			},
+			{}
+		)
+	);
 };
 
 /**

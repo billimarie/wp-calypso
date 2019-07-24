@@ -57,7 +57,7 @@ class WP_REST_Sideload_Image_Controller extends WP_REST_Attachments_Controller {
 	 * @return WP_Error|WP_REST_Response Response object on success, WP_Error object on failure.
 	 */
 	public function create_item( $request ) {
-		if ( in_array( get_post_type( $request->get_param( 'post_id' ) ), [ 'revision', 'attachment' ], true ) ) {
+		if ( ! empty( $request['post_id'] ) && in_array( get_post_type( $request['post_id'] ), [ 'revision', 'attachment' ], true ) ) {
 			return new WP_Error( 'rest_invalid_param', __( 'Invalid parent type.' ), [ 'status' => 400 ] );
 		}
 
