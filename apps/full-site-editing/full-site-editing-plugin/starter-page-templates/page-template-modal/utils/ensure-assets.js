@@ -7,7 +7,7 @@ import { reduce, isEmpty, forEach, set } from 'lodash';
  * WordPress dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
+import { removeQueryArgs } from '@wordpress/url';
 
 /**
  * A full asset URL.
@@ -59,6 +59,9 @@ import { addQueryArgs } from '@wordpress/url';
  * @returns {Assets} assets object with the new {@link Asset} included
  */
 const addAssetToLoad = ( assets, url, usages ) => {
+	// Remove resizing query arguments from the URL.
+	url = removeQueryArgs( url, 'w', 's' );
+
 	// Use an existing asset for the URL or make a new one.
 	const asset = assets[ url ] || {
 		url,
