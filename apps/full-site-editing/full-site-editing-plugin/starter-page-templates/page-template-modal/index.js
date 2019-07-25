@@ -23,6 +23,8 @@ import ensureAssets from './utils/ensure-assets';
 class PageTemplateModal extends Component {
 	state = {
 		isLoading: false,
+		selectedTemplate: null,
+		error: null,
 	};
 
 	constructor( props ) {
@@ -37,9 +39,9 @@ class PageTemplateModal extends Component {
 	}
 
 	selectTemplate = newTemplate => {
-		this.setState( { isOpen: false } );
 		trackSelection( this.props.segment.id, this.props.vertical.id, newTemplate );
 
+		const { siteInformation } = this.props;
 		const template = this.props.templates[ newTemplate ];
 		this.props.saveTemplateChoice( template );
 
@@ -48,13 +50,26 @@ class PageTemplateModal extends Component {
 			return;
 		}
 
-		const processedTemplate = {
-			...template,
-			title: replacePlaceholders( template.title, this.props.siteInformation ),
-			content: replacePlaceholders( template.content, this.props.siteInformation ),
-		};
+		const templateTitle = replacePlaceholders( template.title, siteInformation );
 
-		this.props.insertTemplate( processedTemplate );
+		this.setState( {
+			error: null,
+			isLoading: true,
+			selectTemplateTitle: template,
+		} );
+
+		const blocks = parseBlocks( replacePlaceholders( template.content, siteInformation ) );
+		ensureAssets( blocks )
+			.then( blocksWithAssets => {
+				this.props.insertTemplate( templateTitle, blocksWithAssets );
+				setTimeout( () => this.setState( { isOpen: false } ), 300 );
+			} )
+			.catch( error => {
+				this.setState( {
+					isLoading: false,
+					error,
+				} );
+			} );
 	};
 
 	closeModal = () => {
@@ -118,25 +133,20 @@ const PageTemplatesPlugin = compose(
 					},
 				} );
 			},
-			insertTemplate: template => {
+			insertTemplate: ( title, blocks ) => {
 				// Set post title.
 				editorDispatcher.editPost( {
-					title: template.title,
+					title: title,
 				} );
 
 				// Insert blocks.
 				const postContentBlock = ownProps.postContentBlock;
-				const blocks = parseBlocks( template.content );
-				ensureAssets( blocks )
-					.then( blocksWithAssets => {
-						editorDispatcher.insertBlocks(
-							blocksWithAssets,
-							0,
-							postContentBlock ? postContentBlock.clientId : '',
-							false
-						);
-					} )
-					.catch( e => console.log( e ) );
+				editorDispatcher.insertBlocks(
+					blocks,
+					0,
+					postContentBlock ? postContentBlock.clientId : '',
+					false
+				);
 			},
 		};
 	} )
