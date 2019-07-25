@@ -151,7 +151,8 @@ const fetchAssets = async assets => {
 
 	return await apiFetch( {
 		method: 'POST',
-		path: addQueryArgs( '/fse/v1/batch', { requests } ),
+		path: '/fse/v1/batch',
+		data: { requests },
 	} ).then( response =>
 		reduce(
 			assets,
