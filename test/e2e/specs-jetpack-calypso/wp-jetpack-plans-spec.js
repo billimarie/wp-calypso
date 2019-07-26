@@ -53,7 +53,7 @@ describe( `[${ host }] Jetpack Plans: (${ screenSize }) @jetpack`, function() {
 
 		step( 'Can log into WordPress.com', async function() {
 			this.loginFlow = new LoginFlow( driver );
-			return await this.loginFlow.login();
+			return await this.loginFlow.login( { useFreshLogin: true } );
 		} );
 
 		step( 'Can log into site via Jetpack SSO', async function() {
