@@ -46,7 +46,7 @@ describe( `Can see WooCommerce Store option in Calypso '${ screenSize }' @parall
 	// Login as WooCommerce store user and open the sidebar
 	step( 'Log In', async function() {
 		const loginFlow = new LoginFlow( driver, 'wooCommerceUser' );
-		await loginFlow.login();
+		await loginFlow.login( { useFreshLogin: true } );
 		const navBarComponent = await NavBarComponent.Expect( driver );
 		return await navBarComponent.clickMySites();
 	} );

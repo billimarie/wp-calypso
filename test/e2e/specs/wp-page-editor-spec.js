@@ -54,7 +54,7 @@ describe( `[${ host }] Editor: Pages (${ screenSize })`, function() {
 
 		step( 'Can log in', async function() {
 			const loginFlow = new LoginFlow( driver );
-			await loginFlow.loginAndStartNewPage();
+			await loginFlow.loginAndStartNewPage( { useFreshLogin: true } );
 		} );
 
 		step( 'Can enter page title, content and image', async function() {

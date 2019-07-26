@@ -40,7 +40,7 @@ describe( `[${ host }] Plans: (${ screenSize }) @parallel @jetpack`, function() 
 	describe( 'Comparing Plans:', function() {
 		step( 'Login and Select My Site', async function() {
 			const loginFlow = new LoginFlow( driver );
-			return await loginFlow.loginAndSelectMySite();
+			return await loginFlow.loginAndSelectMySite( { useFreshLogin: true } );
 		} );
 
 		step( 'Can Select Plans', async function() {
@@ -156,7 +156,7 @@ describe( `[${ host }] Plans: (${ screenSize }) @parallel @jetpack`, function() 
 
 		step( 'Can log into WordPress.com', async function() {
 			const loginFlow = new LoginFlow( driver );
-			return await loginFlow.login();
+			return await loginFlow.login( { useFreshLogin: true } );
 		} );
 
 		step( 'Can navigate to purchases', async function() {

@@ -34,7 +34,7 @@ describe( 'Verify Import Option: (' + screenSize + ') @parallel', function() {
 
 	step( 'Can log in as default user', async function() {
 		const loginFlow = new LoginFlow( driver );
-		return await loginFlow.login();
+		return await loginFlow.login( { useFreshLogin: true } );
 	} );
 
 	step( 'Can open the sidebar', async function() {
