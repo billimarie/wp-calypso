@@ -80,7 +80,13 @@
 
 }
 
-.contact-details-form-fields__extra-fields {
+.contact-details-form-fields__container.location-search > .search {
+	margin-top: 15px;
+	margin-bottom: 0;
+}
+
+.contact-details-form-fields__extra-fields,
+.contact-details-form-fields__field {
 	margin-top: 15px;
 }
 
