@@ -389,8 +389,9 @@ export class WebPaymentBox extends React.Component {
 		// https://developer.mozilla.org/en-US/docs/Web/API/PaymentRequest/show),
 		// so we can't delay the opening of the payment sheet on waiting for
 		// the response to this API call.
-		wpcom.undocumented().paygateConfiguration(
-			{
+		wpcom
+			.undocumented()
+			.paygateConfiguration( {
 				request_type: 'new_purchase',
 				country: selectedCountryCode,
 				// The endpoint also accepts an optional credit card brand in
@@ -401,15 +402,14 @@ export class WebPaymentBox extends React.Component {
 				// is open, but we need to send Apple Pay the processor country
 				// in order to open the payment sheet). Fortunately, in most
 				// cases this won't have a practical effect.
-			},
-			function( configError, configuration ) {
+			} )
+			.then( configuration => {
 				let processorCountry = 'US';
-				if ( ! configError && configuration.processor === 'stripe_ie' ) {
+				if ( configuration.processor === 'stripe_ie' ) {
 					processorCountry = 'IE';
 				}
 				this.setState( { processorCountry } );
-			}.bind( this )
-		);
+			} );
 	};
 
 	/**

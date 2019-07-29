@@ -1,5 +1,4 @@
 /**
- * @format
  * @jest-environment jsdom
  */
 
@@ -7,9 +6,13 @@
  * External dependencies
  */
 import React from 'react';
-import { shallow } from 'enzyme';
+import { Provider } from 'react-redux';
+import { shallow, mount } from 'enzyme';
 import { identity } from 'lodash';
 
+/**
+ * Internal dependencies
+ */
 import { WebPaymentBox } from '../web-payment-box';
 import { BEFORE_SUBMIT } from 'lib/store-transactions/step-types';
 import PaymentCountrySelect from 'components/payment-country-select';
@@ -30,6 +33,10 @@ jest.mock( 'lib/cart-values', () => ( {
 		hasRenewableSubscription: jest.fn(),
 	},
 } ) );
+
+// Mock some Redux-connected non-essential components to be empty
+jest.mock( 'my-sites/checkout/checkout/recent-renewals', () => () => null );
+jest.mock( 'my-sites/checkout/checkout/checkout-terms', () => () => null );
 
 window.ApplePaySession = { canMakePayments: () => true };
 window.PaymentRequest = true;
@@ -56,14 +63,14 @@ describe( 'WebPaymentBox', () => {
 		transaction: {},
 	};
 
-	const context = {
-		// mock Redux store to keep connect() calls happy
-		store: {
-			subscribe: jest.fn(),
-			dispatch: jest.fn(),
-			getState: jest.fn(),
-		},
+	// mock Redux store to keep connect() calls happy
+	const store = {
+		subscribe: () => () => {},
+		dispatch: () => {},
+		getState: () => ( {} ),
 	};
+
+	const ReduxProvider = ( { children } ) => <Provider store={ store }>{ children }</Provider>;
 
 	test( 'should render', () => {
 		shallow( <WebPaymentBox { ...defaultProps } /> );
@@ -71,21 +78,20 @@ describe( 'WebPaymentBox', () => {
 
 	describe( 'Cart Store Integration', () => {
 		describe( 'Country Code', () => {
-			const countrySelectWrapper = () =>
-				shallow( <WebPaymentBox { ...defaultProps } />, { context } ).find( PaymentCountrySelect );
+			const countrySelectWrapper = () => {
+				const wrapper = mount( <WebPaymentBox { ...defaultProps } />, {
+					wrappingComponent: ReduxProvider,
+				} );
+				return wrapper.find( PaymentCountrySelect );
+			};
 
 			test( 'Should render value from the cart store', () => {
-				expect(
-					countrySelectWrapper()
-						.find( PaymentCountrySelect )
-						.prop( 'value' )
-				).toEqual( 'TEST_CART_COUNTRY_CODE' );
+				expect( countrySelectWrapper().prop( 'value' ) ).toEqual( 'TEST_CART_COUNTRY_CODE' );
 			} );
 
 			test( 'Should update the store when changed', () => {
 				countrySelectWrapper()
-					.dive() // unwrap Connect Call
-					.dive() // Activate underlying CountrySelect behaviour.
+					.find( 'select' )
 					.simulate( 'change', { target: { value: 'TEST' } } );
 
 				expect( setTaxCountryCode ).toHaveBeenCalledWith( 'TEST' );
@@ -93,10 +99,12 @@ describe( 'WebPaymentBox', () => {
 		} );
 
 		describe( 'Postal Code', () => {
-			const postalCodeInputWrapper = () =>
-				shallow( <WebPaymentBox { ...defaultProps } />, { context } ).findWhere(
-					n => n.prop( 'name' ) === 'postal-code'
-				);
+			const postalCodeInputWrapper = () => {
+				const wrapper = mount( <WebPaymentBox { ...defaultProps } />, {
+					wrappingComponent: ReduxProvider,
+				} );
+				return wrapper.findWhere( n => n.type() === 'input' && n.prop( 'name' ) === 'postal-code' );
+			};
 
 			test( 'Should render value from the cart store', () => {
 				expect( postalCodeInputWrapper().prop( 'value' ) ).toEqual( 'TEST_CART_POSTAL_CODE' );
