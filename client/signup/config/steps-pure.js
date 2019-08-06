@@ -424,6 +424,11 @@ export function generateSteps( {
 			],
 		},
 
+		'import-preview': {
+			stepName: 'import-preview',
+			dependencies: [ 'importSiteEngine', 'importSiteFavicon', 'importSiteUrl', 'siteTitle' ],
+		},
+
 		'reader-landing': {
 			stepName: 'reader-landing',
 			providesDependencies: [],

@@ -5,10 +5,10 @@
  */
 import React from 'react';
 
-export default () => (
+export default ( { className = 'wix-logo social-logo importer__service-icon' } ) => (
 	<svg
 		/*eslint-disable wpcalypso/jsx-classname-namespace */
-		className="wix-logo social-logo importer__service-icon"
+		className={ className }
 		/*eslint-enable wpcalypso/jsx-classname-namespace */
 		xmlns="http://www.w3.org/2000/svg"
 		width="48"

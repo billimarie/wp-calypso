@@ -5,10 +5,10 @@
  */
 import React from 'react';
 
-export default () => (
+export default ( { className = 'medium-logo social-logo importer__service-icon' } ) => (
 	<svg
 		/*eslint-disable wpcalypso/jsx-classname-namespace */
-		className="medium-logo social-logo importer__service-icon"
+		className={ className }
 		/*eslint-enable wpcalypso/jsx-classname-namespace */
 		width="48px"
 		height="48px"

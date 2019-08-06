@@ -16,6 +16,7 @@ const stepNameToModuleName = {
 	'domains-theme-preselected': 'domains',
 	'domains-launch': 'domains',
 	'from-url': 'import-url',
+	'import-preview': 'import-preview',
 	launch: 'launch-site',
 	plans: 'plans',
 	'plans-ecommerce': 'plans',
