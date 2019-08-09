@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -25,6 +24,7 @@ import {
 	getSocialAccountIsLinking,
 	getSocialAccountLinkService,
 } from 'state/login/selectors';
+import { getCurrentUser } from 'state/current-user/selectors';
 import { wasManualRenewalImmediateLoginAttempted } from 'state/immediate-login/selectors';
 import { getCurrentOAuth2Client } from 'state/ui/oauth2-clients/selectors';
 import getCurrentQueryArguments from 'state/selectors/get-current-query-arguments';
@@ -39,6 +39,7 @@ import PushNotificationApprovalPoller from './two-factor-authentication/push-not
 import userFactory from 'lib/user';
 import AsyncLoad from 'components/async-load';
 import VisitSite from 'blocks/visit-site';
+import ContinueAsUser from 'blocks/continue-as-user';
 
 /**
  * Style dependencies
@@ -154,11 +155,18 @@ class Login extends Component {
 			translate,
 			twoStepNonce,
 			fromSite,
+			currentUser,
+			redirectTo,
 		} = this.props;
 
 		let headerText = translate( 'Log in to your account' );
 		let preHeader = null;
 		let postHeader = null;
+
+		if ( currentUser ) {
+			const name = currentUser.display_name || currentUser.username;
+			postHeader = <ContinueAsUser userName={ name } redirectUrl={ redirectTo || '/' } />;
+		}
 
 		if ( isManualRenewalImmediateLoginAttempt ) {
 			headerText = translate( 'Log in to update your payment details and renew your subscription' );
@@ -355,6 +363,7 @@ class Login extends Component {
 
 export default connect(
 	state => ( {
+		currentUser: getCurrentUser( state ),
 		redirectTo: getRedirectToSanitized( state ),
 		requestNotice: getRequestNotice( state ),
 		twoFactorEnabled: isTwoFactorEnabled( state ),
