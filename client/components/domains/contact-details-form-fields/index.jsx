@@ -492,25 +492,28 @@ export class ContactDetailsFormFields extends Component {
 					{ this.createField( 'phone', FormPhoneMediaInput, {
 						label: translate( 'Phone' ),
 						onChange: this.handlePhoneChange,
-				</div>
-
-				{ this.renderLocationSearch() }
-
-				{ this.createField(
-					'country-code',
-					CountrySelect,
-					{
-						label: translate( 'Country' ),
 						countriesList: this.props.countriesList,
 						countryCode: this.state.phoneCountryCode,
 						enableStickyCountry: false,
 					} ) }
+				</div>
 
 				<div className="contact-details-form-fields__row">
 					{ needsFax &&
 						this.createField( 'fax', Input, {
 							label: translate( 'Fax' ),
 						} ) }
+				</div>
+
+				<div className="contact-details-form-fields__row">{ this.renderLocationSearch() }</div>
+
+				<div className="contact-details-form-fields__row">
+					{ this.createField( 'country-code', CountrySelect, {
+						label: translate( 'Country' ),
+						countriesList: this.props.countriesList,
+						countryCode: this.state.phoneCountryCode,
+						enableStickyCountry: false,
+					} ) }
 				</div>
 
 				<div className="contact-details-form-fields__row">
@@ -523,7 +526,7 @@ export class ContactDetailsFormFields extends Component {
 								countriesList: this.props.countriesList,
 							},
 							true
-					) }
+						) }
 				</div>
 
 				{ this.state.locationSelected && countryCode && (

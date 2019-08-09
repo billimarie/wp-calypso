@@ -80,9 +80,10 @@
 
 }
 
-.contact-details-form-fields__container.location-search > .search {
+.contact-details-form-fields__field.location-search > .search {
 	margin-top: 15px;
 	margin-bottom: 0;
+	border: 1px solid var( --color-neutral-100 );
 }
 
 .contact-details-form-fields__extra-fields,
