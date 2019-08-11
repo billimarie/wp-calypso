@@ -23,6 +23,7 @@ import Prediction from './prediction';
 import './style.scss';
 
 let autocompleteService = null;
+let sessionToken = null;
 
 class LocationSearch extends Component {
 	static propTypes = {
@@ -79,24 +80,16 @@ class LocationSearch extends Component {
 
 		this.setState( { loading: true, query }, () => {
 			if ( query ) {
-				/*
-				 * https://developers.google.com/maps/documentation/javascript/places-autocomplete#session_tokens
-				 * // Create a new session token.
-					var sessionToken = new google.maps.places.AutocompleteSessionToken();
-
-					// Pass the token to the autocomplete service.
-					var autocompleteService = new google.maps.places.AutocompleteService();
-					autocompleteService.getPlacePredictions({
-					  input: 'pizza near Syd',
-					  sessionToken: sessionToken
-					},
-					displaySuggestions);
-				*/
+				if ( ! sessionToken ) {
+					// eslint-disable-next-line no-undef
+					sessionToken = new google.maps.places.AutocompleteSessionToken();
+				}
 				autocompleteService.getPlacePredictions(
 					{
 						input: query,
 						types: this.props.types,
 						language: getLocaleSlug(),
+						sessionToken,
 					},
 					this.updatePredictions
 				);
@@ -111,7 +104,8 @@ class LocationSearch extends Component {
 			this.setState( { predictions: [] } );
 		}
 
-		this.props.onPredictionClick( prediction );
+		this.props.onPredictionClick( prediction, sessionToken );
+		sessionToken = null;
 	};
 
 	renderPrediction = prediction => {

@@ -31,6 +31,7 @@ import FormFieldset from 'components/forms/form-fieldset';
 import FormFooter from 'my-sites/domains/domain-management/components/form-footer';
 import FormButton from 'components/forms/form-button';
 import FormPhoneMediaInput from 'components/forms/form-phone-media-input';
+import FormLabel from 'components/forms/form-label';
 import { countries } from 'components/phone-input/data';
 import formState from 'lib/form-state';
 import analytics from 'lib/analytics';
@@ -344,13 +345,14 @@ export class ContactDetailsFormFields extends Component {
 		} );
 	}
 
-	handleAddressPredictionClick = prediction => {
+	handleAddressPredictionClick = ( prediction, sessionToken ) => {
 		// eslint-disable-next-line no-undef
 		const placesService = new google.maps.places.PlacesService( document.createElement( 'div' ) );
 		placesService.getDetails(
 			{
 				placeId: prediction.place_id,
 				fields: [ 'address_component' ],
+				sessionToken,
 			},
 			( { address_components: addressComponents }, status ) => {
 				// eslint-disable-next-line no-undef
@@ -425,7 +427,11 @@ export class ContactDetailsFormFields extends Component {
 	renderLocationSearch() {
 		return (
 			<div className="contact-details-form-fields__field location-search">
+				<FormLabel htmlFor="location-search">
+					{ this.props.translate( 'Address search' ) }
+				</FormLabel>
 				<LocationSearch
+					name="location-search"
 					card={ false }
 					types={ [ 'address' ] }
 					onSearch={ this.handleLocationSearch }
@@ -506,15 +512,6 @@ export class ContactDetailsFormFields extends Component {
 				</div>
 
 				<div className="contact-details-form-fields__row">{ this.renderLocationSearch() }</div>
-
-				<div className="contact-details-form-fields__row">
-					{ this.createField( 'country-code', CountrySelect, {
-						label: translate( 'Country' ),
-						countriesList: this.props.countriesList,
-						countryCode: this.state.phoneCountryCode,
-						enableStickyCountry: false,
-					} ) }
-				</div>
 
 				<div className="contact-details-form-fields__row">
 					{ this.state.locationSelected &&
