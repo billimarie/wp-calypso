@@ -39,7 +39,7 @@ import PushNotificationApprovalPoller from './two-factor-authentication/push-not
 import userFactory from 'lib/user';
 import AsyncLoad from 'components/async-load';
 import VisitSite from 'blocks/visit-site';
-import ContinueAsUser from 'blocks/continue-as-user';
+import ContinueAsUser from 'blocks/login/continue-as-user';
 
 /**
  * Style dependencies

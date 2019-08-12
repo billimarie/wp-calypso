@@ -7,7 +7,7 @@ import { useTranslate } from 'i18n-calypso';
 /**
  * Style dependencies
  */
-import './style.scss';
+import './continue-as-user.scss';
 
 export default function ContinueAsUser( { userName, redirectUrl } ) {
 	const translate = useTranslate();
