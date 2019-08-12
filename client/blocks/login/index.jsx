@@ -164,8 +164,7 @@ class Login extends Component {
 		let postHeader = null;
 
 		if ( currentUser ) {
-			const name = currentUser.display_name || currentUser.username;
-			postHeader = <ContinueAsUser userName={ name } redirectUrl={ redirectTo || '/' } />;
+			postHeader = <ContinueAsUser user={ currentUser } redirectUrl={ redirectTo || '/' } />;
 		}
 
 		if ( isManualRenewalImmediateLoginAttempt ) {
