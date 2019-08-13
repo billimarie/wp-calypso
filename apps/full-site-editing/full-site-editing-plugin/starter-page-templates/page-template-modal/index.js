@@ -53,8 +53,8 @@ class PageTemplateModal extends Component {
 		this.props.insertTemplate( title, blocks );
 	};
 
-	focusTemplate = ( slug, title, blocks ) => {
-		this.setState( { previewBlocks: blocks } );
+	focusTemplate = ( slug, title, previewBlocks ) => {
+		this.setState( { previewBlocks } );
 	};
 
 	closeModal = () => {
@@ -80,8 +80,12 @@ class PageTemplateModal extends Component {
 							<TemplateSelectorControl
 								label={ __( 'Template', 'full-site-editing' ) }
 								templates={ this.props.templates }
-								onTemplateSelect={ ( slug, title, blocks ) => this.selectTemplate( slug, title, blocks ) }
-								onTemplateFocus={ ( slug, title, blocks ) => this.focusTemplate( slug, title, blocks ) }
+								onTemplateSelect={ ( slug, title, blocks ) =>
+									this.selectTemplate( slug, title, blocks )
+								}
+								onTemplateFocus={ ( slug, title, blocks ) =>
+									this.focusTemplate( slug, title, blocks )
+								}
 								dynamicPreview={ true }
 							/>
 						</fieldset>
@@ -136,12 +140,7 @@ const PageTemplatesPlugin = compose(
 )( PageTemplateModal );
 
 // Load config passed from backend.
-const {
-	templates = [],
-	vertical,
-	segment,
-	tracksUserData,
-} = window.starterPageTemplatesConfig;
+const { templates = [], vertical, segment, tracksUserData } = window.starterPageTemplatesConfig;
 
 if ( tracksUserData ) {
 	initializeWithIdentity( tracksUserData );
@@ -150,11 +149,7 @@ if ( tracksUserData ) {
 registerPlugin( 'page-templates', {
 	render: () => {
 		return (
-			<PageTemplatesPlugin
-				templates={ templates }
-				vertical={ vertical }
-				segment={ segment }
-			/>
+			<PageTemplatesPlugin templates={ templates } vertical={ vertical } segment={ segment } />
 		);
 	},
 } );
