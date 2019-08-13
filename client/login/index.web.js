@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * Internal dependencies
  */
@@ -13,7 +11,7 @@ import {
 	redirectDefaultLocale,
 } from './controller';
 import { setShouldServerSideRenderLogin } from './ssr';
-import { makeForcedLoggedOutLayout, redirectLoggedIn, setUpLocale } from 'controller';
+import { makeLoggedOutLayout, redirectLoggedIn, setUpLocale } from 'controller';
 
 export default router => {
 	if ( config.isEnabled( 'login/magic-login' ) ) {
@@ -22,7 +20,7 @@ export default router => {
 			setUpLocale,
 			redirectLoggedIn,
 			magicLoginUse,
-			makeForcedLoggedOutLayout
+			makeLoggedOutLayout
 		);
 
 		router(
@@ -30,7 +28,7 @@ export default router => {
 			setUpLocale,
 			redirectLoggedIn,
 			magicLogin,
-			makeForcedLoggedOutLayout
+			makeLoggedOutLayout
 		);
 	}
 
@@ -48,7 +46,7 @@ export default router => {
 			setUpLocale,
 			login,
 			setShouldServerSideRenderLogin,
-			makeForcedLoggedOutLayout
+			makeLoggedOutLayout
 		);
 	}
 };
