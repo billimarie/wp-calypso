@@ -9,7 +9,6 @@ import { registerPlugin } from '@wordpress/plugins';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Component } from '@wordpress/element';
 import '@wordpress/nux';
-import { BlockPreview } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -26,6 +25,7 @@ class PageTemplateModal extends Component {
 	};
 
 	constructor( props ) {
+		// eslint-disable-next-line no-console
 		console.time( 'PageTemplateModal' );
 		super();
 		this.state.isOpen = ! isEmpty( props.templates );
@@ -35,7 +35,7 @@ class PageTemplateModal extends Component {
 		if ( this.state.isOpen ) {
 			trackView( this.props.segment.id, this.props.vertical.id );
 		}
-
+		// eslint-disable-next-line no-console
 		console.timeEnd( 'PageTemplateModal' );
 	}
 
@@ -90,9 +90,7 @@ class PageTemplateModal extends Component {
 							/>
 						</fieldset>
 					</form>
-					<TemplateSelectorPreview>
-						<BlockPreview blocks={ this.state.previewBlocks } viewportWidth={ 800 } />
-					</TemplateSelectorPreview>
+					<TemplateSelectorPreview blocks={ this.state.previewBlocks } viewportWidth={ 800 } />
 				</div>
 			</Modal>
 		);
