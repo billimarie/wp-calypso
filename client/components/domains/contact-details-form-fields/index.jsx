@@ -49,6 +49,7 @@ import {
 	CHECKOUT_UK_ADDRESS_FORMAT_COUNTRY_CODES,
 } from './custom-form-fieldsets/constants';
 import { getPostCodeLabelText } from './custom-form-fieldsets/utils';
+import { abtest } from 'lib/abtest';
 
 /**
  * Style dependencies
@@ -475,6 +476,7 @@ export class ContactDetailsFormFields extends Component {
 	renderContactDetailsFields() {
 		const { translate, needsFax, hasCountryStates, labelTexts } = this.props;
 		const countryCode = this.getCountryCode();
+		const usePlacesApi = abtest( 'placesApiInCheckout' ) === 'placesApi';
 
 		return (
 			<div className="contact-details-form-fields__contact-details">
@@ -511,10 +513,12 @@ export class ContactDetailsFormFields extends Component {
 						} ) }
 				</div>
 
-				<div className="contact-details-form-fields__row">{ this.renderLocationSearch() }</div>
+				{ usePlacesApi && (
+					<div className="contact-details-form-fields__row">{ this.renderLocationSearch() }</div>
+				) }
 
 				<div className="contact-details-form-fields__row">
-					{ this.state.locationSelected &&
+					{ ( ! usePlacesApi || this.state.locationSelected ) &&
 						this.createField(
 							'country-code',
 							CountrySelect,
@@ -526,7 +530,7 @@ export class ContactDetailsFormFields extends Component {
 						) }
 				</div>
 
-				{ this.state.locationSelected && countryCode && (
+				{ ( ! usePlacesApi || this.state.locationSelected ) && countryCode && (
 					<RegionAddressFieldsets
 						getFieldProps={ this.getFieldProps }
 						countryCode={ countryCode }
